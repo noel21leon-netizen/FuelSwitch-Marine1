@@ -1,6 +1,6 @@
 # FuelSwitch Marine — ECA Changeover Assistant xxxx
 
-Phone-first, installable PWA that helps engineers plan fuel changeover before an ECA boundary.
+xxxxxPhone-first, installable PWA that helps engineers plan fuel changeover before an ECA boundary.
 **Advisory prototype. Not an approved navigation system. Never operates fuel equipment. No compliance claim.**
 All map data in this repo is **synthetic**: *DEMO DATA — NOT FOR NAVIGATION OR REGULATORY COMPLIANCE*.
 
