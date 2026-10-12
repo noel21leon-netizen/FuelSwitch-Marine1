@@ -1,5 +1,16 @@
 # KOS / Architecture Changelog
 
+## 2026-10-13 — GPS reliability: retry and clearer messages (ADR-048, v0.5.0 label unchanged)
+- Touches FR-003, FR-001, NFR-005/009, R-003, R-007, new R-045. Owner request: more reliable GPS, like a maps app.
+- Changed `browserPositionProvider.ts` (auto-restart with 2/4/8/15 s waits; silent restart after 45 s of silence; stale callbacks ignored; permission denied never retried), `ports.ts` (optional `retry` on error events), `monitoring.ts` (keeps `retry`; `start()` clears the old error), `App.tsx` (GPS status block + **Try GPS again**). New `gpsStatus.ts` (`describeGpsState`).
+- 28 new tests (`gps-status.test.ts`, `gps-reliability.test.ts`); KOS 13 gets P-26…P-29 (NOT RUN); CLAUDE.md and `ci.yml` (expected test count 439) updated.
+- **Verified (sandbox):** strict `tsc` exit 0 on the changed non-UI code and new tests; 43 tests pass on a stand-in for Vitest; 3 deliberate defects were caught. **NOT verified:** real `npm test`, real `tsc` of `App.tsx`, `npm run build`, e2e, and everything on a phone.
+
+## 2026-10-13 — CI checks workflow; owner phone report recorded (v0.5.0 label unchanged)
+- Touches ADR-047, KOS 11/13. Added `.github/workflows/ci.yml`. No file under `src/` or `tests/` changed.
+- Recorded the failed Pages run #1 (missing `src`/`tests` after a web upload), Pages run #2 (green, log unseen) and the owner's verbal phone report. KOS 13 rows deliberately left NOT RUN (no per-row detail).
+- **NOT verified:** the new workflow; real `npm test` (411), `npm run test:e2e`, `npm audit` results; per-row phone evidence.
+
 ## 2026-10-12 — Post-chunk 6 — GitHub Pages deploy workflow (v0.5.0 label unchanged)
 - Touches NFR-001 (installability needs HTTPS hosting), ADR-046. Owner reported an all-black screen after uploading the project to GitHub and opening it. Likely cause (from source, not reproduced in a browser): the raw repository was served, but `index.html` loads `/src/main.tsx`, which needs `vite build`.
 - Added `.github/workflows/deploy-pages.yml` (install, `npm run build`, publish `dist/`). Repo setting required: Settings → Pages → Source: GitHub Actions. No file under `src/` or `tests/` changed.

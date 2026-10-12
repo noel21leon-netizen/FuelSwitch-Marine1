@@ -1,0 +1,57 @@
+# Verification only (ADR-047): never deploys. Runs the Step 0 checks from NEXT_STEPS.md on a machine with network.
+# Results are in the run's logs; paste them back so KOS 11 can record the exact output.
+name: CI checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests (expect 439 after the GPS reliability change: 411 + 28 new)
+        run: npm test
+      - name: npm audit (full report; does not fail the job)
+        continue-on-error: true
+        run: |
+          npm audit --json > audit.json || true
+          npm audit || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-json
+          path: audit.json
+          if-no-files-found: ignore
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      # Headless desktop Chromium against the built app. NOT a phone and NOT a substitute for KOS 13.
+      - name: End-to-end tests (builds first)
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: test-results
+          if-no-files-found: ignore

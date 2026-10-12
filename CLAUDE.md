@@ -43,3 +43,4 @@ There is no `lint` script (ADR-011).
 
 - Chunk 6: e2e specs live in `tests/e2e/*.spec.ts` (ADR-044) and drive the built app in replay mode with a controlled page clock. Always call them *headless desktop Chromium*, never phone evidence; they stay NOT RUN until `npm run test:e2e` has actually been run and its output recorded in KOS 11. Secondary TEXT uses `--ink-300` only; `--ink-500` is for borders (ADR-045, `contrast.test.ts`). Never mark a release gate met without evidence, and never mark a risk CLOSED from code reading, fakes, the shim or a headless browser (KOS 08, chunk 6 review).
 
+- GPS reliability (ADR-048): GPS wording for the user comes only from `describeGpsState`; the provider's restarts and retries never emit or invent a position (a restart just lets the last fix age into STALE), never retry permission-denied, and never imply background tracking. Retry/watchdog behaviour on a real phone is NOT RUN until KOS 13 P-26…P-29 are done by a person.

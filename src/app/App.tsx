@@ -6,6 +6,7 @@ import { BrowserPositionProvider } from '../infrastructure/geolocation/browser/b
 import { SimulatorPositionProvider, defaultSimulatorConfig } from '../infrastructure/geolocation/simulator/routeReplaySimulator';
 import { BrowserNotificationProvider } from '../infrastructure/notifications/browser/browserNotificationProvider';
 import { loadDemoDataset, loadDemoRoute } from '../infrastructure/regulatory-data/local/localDatasetLoader';
+import { describeGpsState } from '../application/use-cases/gpsStatus';
 import { MonitoringController, defaultMonitoringConfig, type AlertRecord, type MonitoringConfig, type MonitoringSnapshot } from '../application/use-cases/monitoring';
 import { ChangeoverLogService } from '../application/use-cases/changeoverLog';
 import { indexedDbLogStore } from '../infrastructure/persistence/indexeddb/indexedDbLogStore';
@@ -110,6 +111,9 @@ export function App() {
 
   useEffect(() => { if (controller.current) void controller.current.updateConfig(controllerConfig).then(setSnapshot); }, [controllerConfig]);
 
+  // "Try GPS again": stop and start the same controller, so the last fix and the alert state are kept and only the GPS search restarts.
+  function restartGps() { const c = controller.current; if (c) { c.stop(); c.start(); } }
+
   async function updateSettings(next: SavedSettings) {
     setSettings(next);
     try { await indexedDbLocalStore.write('current', next); setNotice('Settings saved on this device.'); }
@@ -128,6 +132,8 @@ export function App() {
   const eta = snapshot?.eta.status === 'available' ? snapshot.eta : null;
   const plan = snapshot?.plan.status === 'available' ? snapshot.plan : null;
   const badge = snapshot?.badge ?? 'UNAVAILABLE';
+  // Plain-language GPS state (ADR-048). Wording lives in the application layer, not here.
+  const gps = describeGpsState({ mode: settings.mode, snapshot, platform: browserInstallPrompt.getEnvironment().isIos ? 'ios' : 'other' });
   const formatTime = (iso?: string) => iso ? new Date(iso).toLocaleString() : 'Unavailable';
 
   return <div className="app">
@@ -138,6 +144,11 @@ export function App() {
     <main className="app__main">
       {tab === 'dashboard' && <>
         <section className="panel"><h2>Vessel status</h2><p><strong>{badge}</strong>{reason ? ` — ${reason}` : ''}</p>
+          {settings.mode === 'gps' && <div className="gps-status" role="status" aria-live="polite" data-gps-level={gps.level}>
+            <p><strong>{gps.headline}</strong>{gps.detail ? ` — ${gps.detail}` : ''}</p>
+            {gps.action && <p>{gps.action}</p>}
+            {gps.offerRetryButton && <button onClick={restartGps}>Try GPS again</button>}
+          </div>}
           <dl className="metrics"><dt>Position</dt><dd>{position?.ok ? `${position.position.latitudeDeg.toFixed(5)}, ${position.position.longitudeDeg.toFixed(5)}` : 'Unavailable'}</dd>
           <dt>Accuracy</dt><dd>{position?.ok ? `${position.position.accuracyMeters} m` : reason ?? 'No fix received'}</dd>
           <dt>Fix age</dt><dd>{fixAge.text}</dd>

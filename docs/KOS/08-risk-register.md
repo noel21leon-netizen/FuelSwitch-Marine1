@@ -48,6 +48,7 @@ Owner = TBD (to be assigned by project owner). Severity: H/M/L. All mitigations 
 | R-042 | `@playwright/test` was added to `package.json` but not to `package-lock.json` (no registry offline), and Chromium has to be downloaded; `npm ci` will refuse an out-of-sync lockfile | L | Run `npm install` to regenerate the lockfile and commit it; then `npx playwright install chromium` | OPEN |
 | R-043 | `@turf/turf` is a production dependency (≈130 packages in the non-dev part of the lockfile) but no file in `src/` imports it. It widens the audit surface and the install size for nothing | L | Owner decision: remove it with `npm uninstall @turf/turf` on a networked machine (layering tests only mention it as a forbidden import, so they stay valid), or record why it is kept for later geometry work (ADR) | OPEN |
 | R-044 | The 6 `npm audit` advisories from chunk 4 (3 moderate, 1 high, 2 critical) are not triaged: `npm audit` could not run in chunk 6 and the affected packages are unknown here | M | Run `npm audit --json`; for each advisory record package, dev-only vs shipped (compare with the lockfile's non-dev list in KOS 11), fix or accept with a reason; never dismiss without a record | OPEN |
+| R-045 | Automatic GPS restarts (ADR-048) are untested on real phones: the 45 s silent-stall restart or the restart after an error could cause repeated permission prompts, extra battery use, or flicker between states on iOS Safari or the installed app; the iPhone Settings wording may not match the iOS version | M | Options can be tuned or switched off; permission denied is never auto-retried; KOS 13 rows P-26…P-29 (all NOT RUN) record what actually happens | OPEN |
 
 ## Chunk 6 review of R-001…R-044 (2026-10-12)
 Method: each risk re-read against the repository and the chunk 6 evidence in KOS 11. "OPEN" means the mitigation is a design/wording measure that has not been proven on a device or with the real toolchain. **No risk is CLOSED on the strength of code reading, fakes, the shim or a headless browser.** A shim result is *not* real Vitest (R-017).
@@ -97,5 +98,6 @@ Method: each risk re-read against the repository and the chunk 6 evidence in KOS
 | R-042 | OPEN | New in chunk 6 |
 | R-043 | OPEN | New in chunk 6 |
 | R-044 | OPEN | New in chunk 6 |
+| R-045 | OPEN | New 2026-10-13; nothing tested on a phone |
 Tally: 44 risks — 1 CLOSED (R-021), 2 PARTIALLY MITIGATED (R-019, R-039), 41 OPEN.
 

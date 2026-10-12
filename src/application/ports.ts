@@ -7,9 +7,12 @@ export type PositionErrorKind =
 
 export type PositionProviderStatus = 'started' | 'stopped' | 'finished';
 
+/** Present on an error event only when the provider has scheduled an automatic restart of the GPS search. */
+export interface PositionRetry { readonly attempt: number; readonly inSeconds: number }
+
 export type PositionEvent =
   | { readonly type: 'position'; readonly position: VesselPosition }
-  | { readonly type: 'error'; readonly kind: PositionErrorKind; readonly message: string }
+  | { readonly type: 'error'; readonly kind: PositionErrorKind; readonly message: string; readonly retry?: PositionRetry }
   | { readonly type: 'status'; readonly status: PositionProviderStatus };
 
 export type PositionListener = (event: PositionEvent) => void;

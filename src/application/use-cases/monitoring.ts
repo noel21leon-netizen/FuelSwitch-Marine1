@@ -8,7 +8,7 @@ import {
   type AlertDue, type AlertState, type SkippedThreshold, type ChangeoverPlanResult, type DomainSettings, type EtaResult, type EtaMode,
   type PositionAssessment, type RegulatoryDataset, type Route, type VesselPosition,
 } from '../../domain';
-import type { AlertDelivery, NotificationProvider, PositionErrorKind, PositionEvent, PositionProvider } from '../ports';
+import type { AlertDelivery, NotificationProvider, PositionErrorKind, PositionEvent, PositionProvider, PositionRetry } from '../ports';
 
 export type PositionBadge = 'LIVE' | 'SIMULATED' | 'STALE' | 'UNAVAILABLE';
 
@@ -31,7 +31,7 @@ export function defaultMonitoringConfig(over: Partial<MonitoringConfig> = {}): M
   };
 }
 
-export interface ProviderError { readonly kind: PositionErrorKind; readonly message: string; readonly atUtc: string }
+export interface ProviderError { readonly kind: PositionErrorKind; readonly message: string; readonly atUtc: string; readonly retry?: PositionRetry }
 
 export interface AlertRecord {
   readonly alert: AlertDue;
@@ -126,6 +126,7 @@ export class MonitoringController {
   start(): void {
     if (this.running) return;
     this.running = true;
+    this.providerError = null; // a fresh start (e.g. Try GPS again) shows "searching" until the provider reports something new
     this.deps.provider.start((e) => { void this.onEvent(e); });
   }
 
@@ -151,7 +152,7 @@ export class MonitoringController {
       this.providerError = null;
     } else if (e.type === 'error') {
       // The last fix is kept (it will age to STALE); the error is shown alongside — never hidden, never replaced by a made-up value.
-      this.providerError = { kind: e.kind, message: e.message, atUtc: this.deps.clock() };
+      this.providerError = { kind: e.kind, message: e.message, atUtc: this.deps.clock(), ...(e.retry ? { retry: e.retry } : {}) };
     }
     await this.evaluate();
   }

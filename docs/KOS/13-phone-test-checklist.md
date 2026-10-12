@@ -41,6 +41,10 @@ Result values: `NOT RUN` · `PASS` · `FAIL` · `BLOCKED` (could not be attempte
 | P-23 | Lock the screen / switch apps for a few minutes, return | App shows the background limit text on More; position may be stale until fixes resume; nothing claims continuous tracking | NOT RUN | | | |
 | P-24 | Route replay mode | SIMULATED badge everywhere; DEMO banner always visible | NOT RUN | | | |
 | P-25 | Slow stationary SOG (below 0.5 kn) | ETA unavailable with an SOG reason, not a made-up speed | NOT RUN | | | |
+| P-26 | Live GPS running outdoors, then airplane mode (or GPS off) for about 20 s, then back on | Within ~30 s: *GPS signal lost* with the real age of the last position and a *Trying again in N s* countdown; ETA and alerts paused. After signal returns it recovers to *GPS signal OK* **without tapping anything** (ADR-048). Record how long recovery took | NOT RUN | | | |
+| P-27 | iPhone: turn Location off for Safari / the installed app, start live GPS | *Location is turned off for this app* with the Settings steps. Check the wording against what iOS really shows (record the iOS version and any difference). Allow location, return, tap **Try GPS again** | NOT RUN | | | |
+| P-28 | Live GPS indoors or inside a building | *Searching for GPS signal…* or *Weak GPS signal* with the measured accuracy; ETA unavailable; no invented numbers | NOT RUN | | | |
+| P-29 | Live GPS, phone stationary, screen kept on for 10 minutes | Position stays fresh or recovers on its own; record any repeated permission prompt, flicker between states, or unusual battery drain (R-045) | NOT RUN | | | |
 
 ## 4. Alerts and notifications (FR-008)
 | ID | Do | Expect | Result | Date | Device / OS / browser | Notes |
@@ -84,3 +88,5 @@ Use a temporary edit of `public/demo-data/synthetic-eca.geojson`, rebuild, and *
 No row above has been run. A person who completes this list has produced *test evidence for a prototype*; it does not meet the release gates in KOS 11 (authorised FOBAS method or explicit manual-only policy, verified geometry with licence, qualified marine engineer review, risk triage).
 
 > Note added in chunk 6: secondary/muted text now uses the new `--ink-300` colour (ADR-045; the old colour measured 3.64:1 on panels). When you do the readability rows (P-60 and neighbours), judge the NEW colour. Contrast was only calculated from the CSS; how it looks on a phone in low light is still NOT RUN. All rows remain NOT RUN until a person does them.
+
+> Owner report, 2026-10-13: after the GitHub Pages deployment (HTTPS), the owner ran the quick pass (install, offline reload, changeover log/CSV, alerts, readability, update) on a real phone and reported verbally that "all are working". **The owner later said the device was an iPhone 12 Pro (iOS and Safari versions not given). No per-row detail was given, and no row's Result has been changed.** The Android rows (P-01 to P-03, P-17) were not covered by this device. Rows stay NOT RUN until the device and what was seen are recorded; this note is an owner statement, not test evidence from the assistant.
