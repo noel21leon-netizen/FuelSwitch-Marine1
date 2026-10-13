@@ -1,5 +1,10 @@
 # KOS / Architecture Changelog
 
+## 2026-10-13 — Fix: ci.yml was invalid YAML (ADR-047, v0.5.0 label unchanged)
+- Touches ADR-047, KOS 11. A step name in `ci.yml` contained a colon followed by a space, which breaks the file. The same mistake was in the earlier "439" label, so the workflow has probably not started since that edit. Owner screenshot: CI runs #3 and #4 show Failure with no running time (run page not seen).
+- Fixed: step is now just "Unit tests"; the count is no longer written in the name. No file under `src/` or `tests/` changed.
+- **Verified (sandbox):** a YAML parser found the error before the fix and parses the fixed file. **NOT verified:** that GitHub now starts the workflow; any result of `npm test`, typecheck, e2e or `npm audit`; the real test count (441 by sandbox count, 442 in README/NEXT_STEPS on GitHub).
+
 ## 2026-10-13 — iPhone Home Screen GPS wording (ADR-049, v0.5.0 label unchanged)
 - Touches FR-003, FR-001, R-046 (new), KOS 13 row P-64 (new). Owner request. `describeGpsState` gets an optional `standalone` flag; `App.tsx` passes `isStandalone` from the install environment. On iPhone + Home Screen + permission denied it says: "Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead." and no longer shows the Settings steps, "in the browser settings" or the Try GPS again button. All other states are unchanged.
 - Files: `src/application/use-cases/gpsStatus.ts`, `src/app/App.tsx`, `tests/unit/gps-status.test.ts` (+2 tests), `ci.yml` (expected count 441), CLAUDE.md, KOS 02/08/09/11/13.

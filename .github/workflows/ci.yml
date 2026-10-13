@@ -23,7 +23,8 @@ jobs:
       - run: npm install --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
-      - name: Unit tests (expect 439 after the GPS reliability change: 411 + 28 new)
+      # Expected test count: see KOS 11. Not stated here: the real count has not been seen yet (notes disagree, 441 vs 442).
+      - name: Unit tests
         run: npm test
       - name: npm audit (full report; does not fail the job)
         continue-on-error: true
