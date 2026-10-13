@@ -22,7 +22,14 @@ export interface GpsStateInput {
   readonly mode: 'simulator' | 'gps';
   readonly snapshot: MonitoringSnapshot | null;
   readonly platform: 'ios' | 'other';
+  /** True when the app was opened from the Home Screen icon (installed / standalone), not in a browser tab. Optional: false when omitted. */
+  readonly homeScreenApp?: boolean;
 }
+
+/** ADR-049: on an iPhone, an app opened from the Home Screen icon has its own location permission and may be refused for good. Said plainly, without "browser settings". */
+export const HOME_SCREEN_IOS_GPS_TEXT = 'Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead.';
+const HOME_SCREEN_IOS_ACTION =
+  'To try here anyway: Settings → Privacy & Security → Location Services → find this app (or Safari Websites) → While Using the App, then tap Try GPS again. If it is still refused, delete the Home Screen icon and add it again, or keep using the link in your browser.';
 
 const OPEN_SKY_TIP = 'Move to open sky or near a window. GPS is weak indoors and inside steel structures.';
 
@@ -56,6 +63,10 @@ export function describeGpsState(input: GpsStateInput): GpsStateView {
   if (err) {
     switch (err.kind) {
       case 'permission-denied':
+        if (input.platform === 'ios' && input.homeScreenApp === true) {
+          // The provider's own message says "in the browser settings", which is wrong for a Home Screen icon, so it is not shown here.
+          return { level: 'blocked', headline: 'Location is turned off for this app', detail: HOME_SCREEN_IOS_GPS_TEXT, action: HOME_SCREEN_IOS_ACTION, offerRetryButton: true };
+        }
         return { level: 'blocked', headline: 'Location is turned off for this app', detail: err.message, action: permissionAction(input.platform), offerRetryButton: true };
       case 'unsupported':
         return { level: 'blocked', headline: 'This browser cannot provide GPS position', detail: err.message, action: 'Open the app in Safari (iPhone) or Chrome (Android).', offerRetryButton: false };

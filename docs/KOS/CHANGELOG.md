@@ -1,5 +1,11 @@
 # KOS / Architecture Changelog
 
+## 2026-10-13 — GPS wording for iPhone Home Screen apps (ADR-049, v0.5.0 label unchanged)
+- Touches FR-003, FR-001, NFR-005/009, R-003, new R-046. Owner request after seeing that GPS works in a browser tab but not in the app added to the Home Screen.
+- Changed `gpsStatus.ts` (new optional input `homeScreenApp`; refused permission in an iPhone Home Screen app now says "Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead." and no longer shows "in the browser settings") and `App.tsx` (passes `installEnv.isStandalone`). 3 new tests in `gps-status.test.ts` (now 16). `ci.yml` step name: expected tests 442. README and NEXT_STEPS refreshed (NEXT_STEPS was still "after chunk 6").
+- Records: ADR-049, R-046, KOS 11 (also the green Deploy run #5 and the owner's phone observation, as owner reports), KOS 13 note, CLAUDE.md.
+- **Verified (sandbox):** strict `tsc` exit 0 on `src/domain`+`src/application`+`src/shared`+the test file; 442 tests on a stand-in for Vitest, 441 pass, 1 not run (`fake-indexeddb` missing); 1 of the 3 new tests fails on the old code, as intended; `verify:scaffold` 14/14 (static). **NOT verified:** real `npm test` (expected 442), real typecheck of `App.tsx` (syntax parse only), the wording on a real iPhone, and whether a Home Screen app added from Chrome reports itself as standalone.
+
 ## 2026-10-13 — GPS reliability: retry and clearer messages (ADR-048, v0.5.0 label unchanged)
 - Touches FR-003, FR-001, NFR-005/009, R-003, R-007, new R-045. Owner request: more reliable GPS, like a maps app.
 - Changed `browserPositionProvider.ts` (auto-restart with 2/4/8/15 s waits; silent restart after 45 s of silence; stale callbacks ignored; permission denied never retried), `ports.ts` (optional `retry` on error events), `monitoring.ts` (keeps `retry`; `start()` clears the old error), `App.tsx` (GPS status block + **Try GPS again**). New `gpsStatus.ts` (`describeGpsState`).
