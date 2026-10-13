@@ -49,7 +49,7 @@ Owner = TBD (to be assigned by project owner). Severity: H/M/L. All mitigations 
 | R-043 | `@turf/turf` is a production dependency (≈130 packages in the non-dev part of the lockfile) but no file in `src/` imports it. It widens the audit surface and the install size for nothing | L | Owner decision: remove it with `npm uninstall @turf/turf` on a networked machine (layering tests only mention it as a forbidden import, so they stay valid), or record why it is kept for later geometry work (ADR) | OPEN |
 | R-044 | The 6 `npm audit` advisories from chunk 4 (3 moderate, 1 high, 2 critical) are not triaged: `npm audit` could not run in chunk 6 and the affected packages are unknown here | M | Run `npm audit --json`; for each advisory record package, dev-only vs shipped (compare with the lockfile's non-dev list in KOS 11), fix or accept with a reason; never dismiss without a record | OPEN |
 | R-045 | Automatic GPS restarts (ADR-048) are untested on real phones: the 45 s silent-stall restart or the restart after an error could cause repeated permission prompts, extra battery use, or flicker between states on iOS Safari or the installed app; the iPhone Settings wording may not match the iOS version | M | Options can be tuned or switched off; permission denied is never auto-retried; KOS 13 rows P-26…P-29 (all NOT RUN) record what actually happens | OPEN |
-| R-046 | On iPhone, an app opened from the Home Screen icon can be refused location permission for good (owner saw "Location is turned off for this app" there while the same link worked in a browser tab). The app cannot re-ask, so live GPS may be unusable in the installed app. It is also NOT verified that the app recognises itself as a Home Screen app when it was added from Chrome on iPhone; if not, the older wording shows | M | ADR-049 says it plainly and points to the browser link; Settings path and delete-and-re-add are offered; "Try GPS again" stays. Real-phone check: KOS 13 P-27 (record browser tab vs Home Screen icon, and the browser used to add it) | OPEN |
+| R-046 | The iPhone Home Screen wording (ADR-049) is unverified: it is not known on a real iPhone whether a Home Screen app can use GPS, nor whether the standalone detection fires, nor whether the browser fallback works for the person | L | KOS 13 row P-64 (NOT RUN) records what the iPhone shows; wording says "may not allow" rather than stating a fact | OPEN |
 
 ## Chunk 6 review of R-001…R-044 (2026-10-12)
 Method: each risk re-read against the repository and the chunk 6 evidence in KOS 11. "OPEN" means the mitigation is a design/wording measure that has not been proven on a device or with the real toolchain. **No risk is CLOSED on the strength of code reading, fakes, the shim or a headless browser.** A shim result is *not* real Vitest (R-017).
@@ -100,6 +100,6 @@ Method: each risk re-read against the repository and the chunk 6 evidence in KOS
 | R-043 | OPEN | New in chunk 6 |
 | R-044 | OPEN | New in chunk 6 |
 | R-045 | OPEN | New 2026-10-13; nothing tested on a phone |
-| R-046 | OPEN | New 2026-10-13; from the owner's iPhone observation (browser tab works, Home Screen icon refused); wording changed in ADR-049, not tested on a phone |
-Tally: 46 risks — 1 CLOSED (R-021), 2 PARTIALLY MITIGATED (R-019, R-039), 43 OPEN.
+| R-046 | OPEN | New 2026-10-13; nothing tested on a phone |
+Tally: 45 risks — 1 CLOSED (R-021), 2 PARTIALLY MITIGATED (R-019, R-039), 42 OPEN.
 

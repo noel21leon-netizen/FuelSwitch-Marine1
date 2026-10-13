@@ -134,7 +134,7 @@ export function App() {
   const badge = snapshot?.badge ?? 'UNAVAILABLE';
   // Plain-language GPS state (ADR-048). Wording lives in the application layer, not here.
   const installEnv = browserInstallPrompt.getEnvironment();
-  const gps = describeGpsState({ mode: settings.mode, snapshot, platform: installEnv.isIos ? 'ios' : 'other', homeScreenApp: installEnv.isStandalone });
+  const gps = describeGpsState({ mode: settings.mode, snapshot, platform: installEnv.isIos ? 'ios' : 'other', standalone: installEnv.isStandalone });
   const formatTime = (iso?: string) => iso ? new Date(iso).toLocaleString() : 'Unavailable';
 
   return <div className="app">

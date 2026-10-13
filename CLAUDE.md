@@ -45,4 +45,4 @@ There is no `lint` script (ADR-011).
 
 - GPS reliability (ADR-048): GPS wording for the user comes only from `describeGpsState`; the provider's restarts and retries never emit or invent a position (a restart just lets the last fix age into STALE), never retry permission-denied, and never imply background tracking. Retry/watchdog behaviour on a real phone is NOT RUN until KOS 13 P-26…P-29 are done by a person.
 
-- iPhone Home Screen wording (ADR-049): the "Home Screen apps on iPhone may not allow GPS" text also comes only from `describeGpsState` (input `homeScreenApp`). It is unverified on a device (R-046): never state it as a confirmed iOS rule, and never mark a KOS 13 row PASS for it without the owner's report of device, iOS version and the exact words shown.
+- Home Screen wording (ADR-049): the iPhone Home Screen message comes only from `describeGpsState` (needs the `standalone` flag from the install environment); never show browser-settings steps or a retry button there, and never state as fact that Home Screen apps cannot use GPS until KOS 13 P-64 is done on a real iPhone.

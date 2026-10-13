@@ -22,14 +22,12 @@ export interface GpsStateInput {
   readonly mode: 'simulator' | 'gps';
   readonly snapshot: MonitoringSnapshot | null;
   readonly platform: 'ios' | 'other';
-  /** True when the app was opened from the Home Screen icon (installed / standalone), not in a browser tab. Optional: false when omitted. */
-  readonly homeScreenApp?: boolean;
+  /** True when the app was opened from the Home Screen icon (installed app) rather than a browser tab. Omitted = false. ADR-049. */
+  readonly standalone?: boolean;
 }
 
-/** ADR-049: on an iPhone, an app opened from the Home Screen icon has its own location permission and may be refused for good. Said plainly, without "browser settings". */
-export const HOME_SCREEN_IOS_GPS_TEXT = 'Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead.';
-const HOME_SCREEN_IOS_ACTION =
-  'To try here anyway: Settings → Privacy & Security → Location Services → find this app (or Safari Websites) → While Using the App, then tap Try GPS again. If it is still refused, delete the Home Screen icon and add it again, or keep using the link in your browser.';
+/** iPhone Home Screen apps may not be allowed to use GPS (ADR-049). Said instead of the Settings steps, which only apply to the browser. */
+const HOME_SCREEN_IOS_TEXT = 'Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead.';
 
 const OPEN_SKY_TIP = 'Move to open sky or near a window. GPS is weak indoors and inside steel structures.';
 
@@ -63,9 +61,9 @@ export function describeGpsState(input: GpsStateInput): GpsStateView {
   if (err) {
     switch (err.kind) {
       case 'permission-denied':
-        if (input.platform === 'ios' && input.homeScreenApp === true) {
-          // The provider's own message says "in the browser settings", which is wrong for a Home Screen icon, so it is not shown here.
-          return { level: 'blocked', headline: 'Location is turned off for this app', detail: HOME_SCREEN_IOS_GPS_TEXT, action: HOME_SCREEN_IOS_ACTION, offerRetryButton: true };
+        if (input.platform === 'ios' && input.standalone === true) {
+          // No Settings steps, no "browser settings" text (err.message contains it, so it is not shown) and no retry button: the person is told to open the link in the browser (ADR-049).
+          return { level: 'blocked', headline: 'Location is turned off for this app', detail: 'Location permission was denied.', action: HOME_SCREEN_IOS_TEXT, offerRetryButton: false };
         }
         return { level: 'blocked', headline: 'Location is turned off for this app', detail: err.message, action: permissionAction(input.platform), offerRetryButton: true };
       case 'unsupported':

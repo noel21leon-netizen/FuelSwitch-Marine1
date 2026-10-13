@@ -79,30 +79,26 @@ describe('describeGpsState', () => {
     expect(v.action).toMatch(/Permissions/);
     expect(v.action).not.toMatch(/Location Services/);
   });
-  it('permission denied in an iPhone Home Screen app says so plainly and does not say \"browser settings\" (ADR-049)', () => {
+  // ADR-049: iPhone Home Screen app with location blocked.
+  it('permission denied in an iPhone Home Screen app says to open the link in the browser, with no Settings steps', () => {
     const error: ProviderError = { kind: 'permission-denied', message: 'Location permission was denied. Allow location access for this site in the browser settings, then start again.', atUtc: NOW };
-    const v = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'ios', homeScreenApp: true });
+    const v = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'ios', standalone: true });
     expect(v.level).toBe('blocked');
-    expect(v.detail).toBe('Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead.');
-    expect(`${v.headline} ${v.detail} ${v.action}`).not.toMatch(/browser settings/);
-    expect(v.action).toMatch(/Location Services/);
-    expect(v.offerRetryButton).toBe(true);
+    expect(v.action).toBe('Home Screen apps on iPhone may not allow GPS. Open the link in your browser instead.');
+    expect(v.detail).toBe('Location permission was denied.');
+    expect(`${v.headline} ${v.detail} ${v.action}`).not.toMatch(/browser settings|Settings|Location Services|Safari Websites/);
+    expect(v.offerRetryButton).toBe(false);
   });
-  it('the same refusal in an iPhone browser tab, or in a Home Screen app on another platform, keeps the earlier wording', () => {
+  it('the Home Screen wording is used only on iPhone + Home Screen + permission denied', () => {
     const error: ProviderError = { kind: 'permission-denied', message: 'Location permission was denied.', atUtc: NOW };
-    const tab = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'ios', homeScreenApp: false });
-    expect(tab.detail).toBe('Location permission was denied.');
-    expect(tab.action).toMatch(/Safari Websites/);
-    const other = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'other', homeScreenApp: true });
-    expect(other.detail).toBe('Location permission was denied.');
-    expect(other.action).toMatch(/Permissions/);
-    // omitted flag behaves like false
-    expect(describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'ios' }).detail).toBe('Location permission was denied.');
-  });
-  it('the Home Screen wording applies only to a refused permission, not to a weak or lost signal', () => {
-    const lost = describeGpsState({ mode: 'gps', snapshot: snap({ fix: fixAt('2026-10-12T05:59:00Z') }), platform: 'ios', homeScreenApp: true });
-    expect(lost.level).toBe('lost');
-    expect(lost.detail).not.toMatch(/Home Screen/);
+    const iosTab = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'ios', standalone: false });
+    const iosOmitted = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'ios' });
+    const androidApp = describeGpsState({ mode: 'gps', snapshot: snap({ error }), platform: 'other', standalone: true });
+    expect(iosTab.action).toMatch(/Location Services/); expect(iosTab.offerRetryButton).toBe(true);
+    expect(iosOmitted.action).toMatch(/Location Services/);
+    expect(androidApp.action).toMatch(/Permissions/); expect(androidApp.action).not.toMatch(/Home Screen/);
+    const lost = describeGpsState({ mode: 'gps', snapshot: snap({ fix: fixAt('2026-10-12T05:59:00Z') }), platform: 'ios', standalone: true });
+    expect(lost.level).toBe('lost'); expect(lost.action).not.toMatch(/Home Screen/);
   });
   it('an insecure page or an unsupported browser has no retry button (a retry cannot fix it)', () => {
     const insecure = gps(snap({ error: { kind: 'insecure-context', message: 'x', atUtc: NOW } }));
