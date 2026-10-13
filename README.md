@@ -19,7 +19,7 @@ npm run typecheck           # tsc strict, 3 configs
 npm run dev                 # http://localhost:5173 (LAN too, via --host)
 npm run build               # typecheck + production build to dist/
 npm run preview             # serve dist/ to test the built PWA + service worker
-npm test                    # Vitest — unit/integration tests (expect 411 after chunk 6: 406 + 5 contrast tests; see KOS 11)
+npm test                    # Vitest — unit/integration tests (expect 442: 411 after chunk 6 + 28 GPS reliability + 3 Home Screen wording; see KOS 11)
 npx playwright install chromium   # once, before the first e2e run
 npm run test:e2e            # build, then Playwright e2e in headless desktop Chromium (NOT a phone; specs never run yet, KOS 11)
 ```
